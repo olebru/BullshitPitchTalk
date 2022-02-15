@@ -4,13 +4,14 @@
 @inject SpeechSynthesis SpeechSynthesis
 
 
-
+<div> error  </div>
 <div> <button @onclick="onClickSpeak">Speak</button> </div>
 
 <div> <button @onclick="onClickList">ListInConsole</button> </div>
 
 @code {
     SpeechSynthesisVoice[] Voices;
+    string error = string.Empty; //Dirty hack.... 
     int vidx = 0;
 
     void onClickList()
@@ -52,7 +53,13 @@
 
                 await SayAFewPhrases(profile);
             }
+        }
 
+
+        if (this.Voices.Length == 0)
+        {
+
+            error = "No natural voices found, this works best in the latest version of Microsoft Edge... ";
 
         }
         return true;
@@ -94,7 +101,7 @@
         {
             var v = await this.SpeechSynthesis.GetVoicesAsync();
             this.Voices = v.Where(v=>
-                v.Lang.Contains("en-")
+                v.Lang.Contains("en-") && v.Name.Contains("(Natural")
             ).ToArray();
             this.StateHasChanged();
         }
