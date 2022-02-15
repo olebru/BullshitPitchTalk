@@ -23,12 +23,13 @@ namespace StratGen2kTurbo
                 {
                     " to ",
                     " hereby ",
+                    " therefore ",
                     " always ",
                     " no one has ",
                     " but ",
                     " while ",
-                    " disregard",
-                    " never! ",
+                    " disregard ",
+                    " never ",
                     " but why would you not "
                     
                 };
