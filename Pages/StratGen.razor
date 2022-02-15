@@ -1,0 +1,102 @@
+﻿@page "/"
+
+@using Toolbelt.Blazor.SpeechSynthesis
+@inject SpeechSynthesis SpeechSynthesis
+
+
+
+<div> <button @onclick="onClickSpeak">Speak</button> </div>
+
+<div> <button @onclick="onClickList">ListInConsole</button> </div>
+
+@code {
+    SpeechSynthesisVoice[] Voices;
+    int vidx = 0;
+
+    void onClickList()
+    {
+        foreach (var voi in Voices)
+        {
+
+            Console.WriteLine(voi.VoiceIdentity);
+
+
+        }
+    }
+    public void onClickSpeak(){ Start(); }
+
+    async Task<bool> Start() {
+
+
+
+        for (var i = 0; i < this.Voices.Length; i++)
+        {
+            var profile = new SpeechSynthesisUtterance
+                {
+                    Lang = "en-US", // BCP 47 language tag
+                    Pitch = 0.2, // 0.0 ~ 2.0 (Default 1.0)
+                    Rate = 1.0, // 0.1 ~ 10.0 (Default 1.0)
+                    Volume = 1.0, // 0.0 ~ 1.0 (Default 1.0)
+                    Voice = this.Voices[i]
+                };
+
+
+            if (i != this.Voices.Length - 1)
+            {
+                await SayAFewPhrases(profile);
+             
+                await SayAFewPhrases(profile,this.Voices[i + 1].Name.Split(" ")[1]);
+            }
+            else
+            {
+
+                await SayAFewPhrases(profile);
+            }
+
+
+        }
+        return true;
+    }
+
+
+
+    async Task<bool> SayAFewPhrases(SpeechSynthesisUtterance speakerProfile)
+    {
+
+        var phrase = await StrategyGenerator.GetRandomPhraseChain(System.Random.Shared.Next(2,5));   
+
+
+        speakerProfile.Text = phrase;
+
+        this.SpeechSynthesis.Speak(speakerProfile); // <-- Speak!
+        return true;
+    }
+
+
+    async Task<bool> SayAFewPhrases(SpeechSynthesisUtterance speakerProfile,string nextSpeakerName)
+    {
+
+        var phrase = await StrategyGenerator.GetRandomPhraseChain(System.Random.Shared.Next(2,5));   
+
+
+        speakerProfile.Text = phrase+ StrategyGenerator.GetRandomHandover(nextSpeakerName);
+
+        this.SpeechSynthesis.Speak(speakerProfile); // <-- Speak!
+        return true;
+    }
+
+
+
+
+    protected async override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var v = await this.SpeechSynthesis.GetVoicesAsync();
+            this.Voices = v.Where(v=>
+                v.Lang.Contains("en-")
+            ).ToArray();
+            this.StateHasChanged();
+        }
+    }
+}
